@@ -1,4 +1,4 @@
-#include "pre_asm.h"
+#include "am_file_functions.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -57,7 +57,6 @@ void freeList(struct list *head) {
         temp = head;
         head = head->next;
         free(temp->value);
-        
         free(temp);
     }
 }

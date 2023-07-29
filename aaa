@@ -1,15 +1,15 @@
 	MAIN: mov a,b ;asdfg
-	mcro m1
+	mcro jhg
 	inc r2
 	mov a,aa
 endmcro
 ;something
 	LOOP: bne a,b	;jjj
 sub	 a,b
-m1
+jhg
 aaa 3,4
 TEST: add a,b ;test label
-mcro m20
+mcro kkk
 	inc qw
 	mov a,jd
 endmcro

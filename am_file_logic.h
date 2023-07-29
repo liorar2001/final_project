@@ -1,0 +1,1 @@
+int am_logic(int argc, char* argv[],int count);
