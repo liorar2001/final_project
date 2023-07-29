@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-struct FileData open_file(char *extention,FILE *fp,FILE *fpw,char* argv[],int count);
+struct FileData open_file(char *extention,FILE *fpw,char* argv[],int count);
 struct LineData* divide_line(char *line);
 int check_operands(char *paramA);
 

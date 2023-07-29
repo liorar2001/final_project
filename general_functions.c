@@ -8,7 +8,7 @@
 
 
 
-struct FileData open_file(char *extension, FILE *fp, FILE *fpw, char *argv[], int count) {
+struct FileData open_file(char *extension, FILE *fpw, char *argv[], int count) {
    struct FileData fileData;
     fileData.name = argv[count];
     strcat(fileData.name, extension);

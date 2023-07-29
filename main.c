@@ -6,7 +6,7 @@
 #include <ctype.h>
 
 int main(int argc, char* argv[]){
-int count=0;
+int count=1;
     while(count<argc){
     am_logic(argc,argv,count); /*build am file*/
     count++;
