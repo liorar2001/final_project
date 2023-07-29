@@ -4,12 +4,13 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
-
 int main(int argc, char* argv[]){
-int count=1;
+    int count=1;
+    char*am_file;
     while(count<argc){
-    am_logic(argc,argv,count); /*build am file*/
-    count++;
+        am_file=am_logic(argc,argv,count); /*build am file*/
+        searchEntry(am_file);
+        count++;
     }
-return 0;
+    return 0;
 }

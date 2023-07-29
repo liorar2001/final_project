@@ -3,3 +3,10 @@
 ################################################################################
 
 /.vs/project/v16
+/.vscode
+/x64/Debug
+/aaa.am
+/project.sln
+/project.vcxproj
+/project.vcxproj.filters
+/project.vcxproj.user

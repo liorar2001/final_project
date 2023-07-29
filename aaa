@@ -13,3 +13,5 @@ mcro kkk
 	inc qw
 	mov a,jd
 endmcro
+.entry TEST
+.extern ABC
