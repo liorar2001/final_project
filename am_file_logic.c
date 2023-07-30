@@ -9,10 +9,8 @@
 
 int am_logic(int argc, char* argv[], int count) {
     /* declearations */
-    int i;
-    struct list *head_lable = NULL;
-    char line[MAX_SIZE], *lable, *command, *paramB, *paramA, *name,*token;
-    FILE *fp, *fpw;
+    char line[MAX_SIZE];
+    FILE *fp, *fpw=NULL;
     struct list *head_mcro = NULL;
     struct list *p = NULL;
     struct list *temp = head_mcro;
