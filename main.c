@@ -9,7 +9,9 @@ int main(int argc, char* argv[]){
     struct LineData* am_file;
     while(count<=argc){
         am_file=am_logic(argc,argv,count-1); /*build am file*/
+        if(am_file!=0)
         searchEntry(am_file,argv,count-1);
+
         count++;
     }
     return 0;

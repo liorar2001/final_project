@@ -141,8 +141,10 @@ struct LineData* am_logic(int argc, char* argv[], int count) {
         fclose(fp);
         fclose(fileData.fpw);
     }
-    else
+    else {
         printf("file %s does not exist\n", argv[count]);
+        return 0;
+    }
     printf("Printing the macros:\n");
     printListM(head_mcro);
     /*freeListM(head_mcro); */
