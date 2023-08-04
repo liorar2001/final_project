@@ -1,39 +1,53 @@
 #include "entry_file_functions.h"
-#include "general_functions.h"
 #include "am_file_functions.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
 #define MAX_SIZE 81
-void searchEntry(char* filename)
+void searchEntry(struct LineData* LineDataHead,char *argv[],int count)
 {
+	
+	/*char* line[MAX_SIZE]; */
+	/*int lineNum = 100;*/ 
+	
+	int IC = 0, DC = 0;
+	struct LineData* lineData=NULL;
+	struct entext_list *entList=NULL;
+	struct entext_list *extList=NULL;
+	struct LineData* orderList=NULL;
+	struct entext_list* ent_head=NULL;
+	struct entext_list* ext_head=NULL;
+
+	/*struct entext_list* orders_head = NULL;*/
+	
 	printf("#### search entry ###\n");
-	char* line[MAX_SIZE];
-	int lineNum = 100, IC = 0, DC = 0;
-	struct LineData* lineData;
-	struct entext_list entList;
-	struct entext_list extList;
-	FILE* fp = fopen(filename, "r");
-	if (fp != NULL) {
-		while (fgets(line, sizeof(line), fp)) 
-		{
-			
-			lineData = divide_line(line);
+	lineData = LineDataHead;
+		while (lineData)
+		{			
 			if (strcmp(lineData->command, ".entry") == 0) {
-			   // strcat(lineData->paramA, "\n");
-				entList.name = lineData->paramA;
-				printf("found entry %s\n", entList.name);
+			  
+			ent_head=append_entext(entList, lineData->paramA);
+	
 				DC++;
 			}
-			if (strcmp(lineData->command, ".extern") == 0) {
-			   // strcat(lineData->paramA, "\n");
-				extList.name = lineData->paramA;
-				printf("found extern %s\n", extList.name);
+			else if (strcmp(lineData->command, ".extern") == 0) {
+			  
+				ext_head=append_entext(extList, lineData->paramA);
+				
 				DC++;
 			}
-			  lineNum++;
+			else
+			{
+				IC = IC + check_operands(lineData->command);
+				if (!orderList)
+					orderList = lineData;
+			
+					
+			}
+			lineData = lineData->next;
 		}
+	
+		
 	}
   
-}

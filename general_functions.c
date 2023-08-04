@@ -9,17 +9,19 @@ struct FileData open_file(char *extension, FILE *fpw, char *argv[], int count) {
    struct FileData fileData;
     fileData.name = argv[count];
     strcat(fileData.name, extension);
-    fileData.fpw = fopen(fileData.name, "w");
+    fileData.fpw = fopen(fileData.name, "w+");
     return fileData;
 }
-struct LineData* divide_line(char *line) {
-    struct LineData *lineData = malloc(sizeof(struct LineData));
-    lineData->head_lable = NULL;
+struct LineData* divide_line(char line[]) {
+    struct LineData *lineData =(struct LineData*) malloc(sizeof(struct LineData));
+    char *token;
+    if (lineData == NULL)return NULL;
     lineData->command = NULL;
     lineData->paramA = NULL;
     lineData->paramB = NULL;
     lineData->lable= NULL;
-    char *token;
+    lineData->next = NULL;
+    
     printf("Processing line: %s", line);
     if (strncmp(line, ";", 1) != 0) {
         /* Divide by semicolon */
@@ -28,10 +30,8 @@ struct LineData* divide_line(char *line) {
             /* Divide by colons */
             lineData->lable = strtok(token, ":");
             token = strtok(NULL, ":");
-            lineData->head_lable = append(lineData->head_lable, lineData->lable);
-        } else {
-            lineData->lable = NULL;
-        }
+            /* append(lineData, lineData->lable); */
+        } 
         /* Divide by comma */
         lineData->command = strtok(token, ",");
         lineData->paramB = strtok(NULL, ",");
@@ -46,24 +46,24 @@ struct LineData* divide_line(char *line) {
     }
     return lineData;
 }
-int check_operands(char *paramA) {
+int check_operands(char *param) {
     char twoOperands[][4] = {"mov", "cmp", "add", "sub", "lea"};
     char oneOperands[][4] = {"not", "clr", "inc", "dec", "jmp", "bne", "red", "prn", "jsr"};
     char noOperands[][4] = {"rts", "stop"};
     int i;
     for (i = 0; i < sizeof(twoOperands) / sizeof(twoOperands[0]); i++) {
-        if (strcmp(paramA, twoOperands[i]) == 0) {
-            return -1;
+        if (strcmp(param, twoOperands[i]) == 0) {
+            return 3;
         }
     }
     for (i = 0; i < sizeof(oneOperands) / sizeof(oneOperands[0]); i++) {
-        if (strcmp(paramA, oneOperands[i]) == 0) {
-            return -1;
+        if (strcmp(param, oneOperands[i]) == 0) {
+            return 2;
         }
     }
     for (i = 0; i < sizeof(noOperands) / sizeof(noOperands[0]); i++) {
-        if (strcmp(paramA, noOperands[i]) == 0) {
-            return -1;
+        if (strcmp(param, noOperands[i]) == 0) {
+            return 1;
         }
     }
     return 1;

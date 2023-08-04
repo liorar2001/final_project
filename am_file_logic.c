@@ -6,84 +6,145 @@
 #include <stdlib.h>
 #include <ctype.h>
 #define MAX_SIZE 81
-char* am_logic(int argc, char* argv[], int count) {
+struct LineData* am_logic(int argc, char* argv[], int count) {
     /* declearations */
     int i;
-    struct list *head_lable = NULL;
-    char line[MAX_SIZE], *lable, *command, *paramB, *paramA, *name,*token;
+
+    char line[MAX_SIZE];
     FILE *fp, *fpw=NULL;
-    struct list *head_mcro = NULL;
-    struct list *p = NULL;
-    struct list* temp = (struct list*)malloc(sizeof(struct list));
-    struct LineData *lineData;
-    struct FileData fileData;
+    struct macro* head_mcro = NULL;
+    int mcroCount = 0;
     
+    struct LineData* lineData=NULL;
+    struct LineData* lineDataHead=NULL;
+    struct FileData fileData;
+    struct macro* p;
+     struct LineData* pr;
+     struct macro* tempMcro ;
+    int macroFlag = 0;
     /*open input file */
     fp = fopen(argv[count], "r");
-    if (fp != NULL) {
+    if (fp != NULL)
+    {
         fileData = open_file(".am", fpw, argv, count); /*open am file */
-    START:
-        while (fgets(line, sizeof(line), fp)) {
+        while (fgets(line, MAX_SIZE, fp))
+        {
             /*divide into parts*/
-            lineData = divide_line(line);
-            /*mcro stuff */
-            if (lineData->command != NULL) {
-                if (strcmp(lineData->command, "mcro") == 0) {
+            char* tmp=(char*)malloc(MAX_SIZE);
+            if (tmp == NULL)return NULL;
+            strcpy(tmp, line);
+            lineData = divide_line(tmp);
+            if (lineData == NULL)return NULL;
+            if (lineData->command!=NULL)
+            {
+                if (strcmp(lineData->command, "mcro") == 0)
+                {
                     if (check_operands(lineData->paramA) == -1) {
                         printf("Error, mcro name invalid");
                         remove(fileData.name);
                         fclose(fp);
                         fclose(fileData.fpw);
-                        return -1;
+                        return NULL;
                     }
-                    head_mcro = append(head_mcro, lineData->paramA);
-                    p = head_mcro;
-                    temp = p;
-                   // temp->lines = (struct list*)malloc(sizeof(struct list));
-                    while (strcmp(temp->value, lineData->paramA) != 0 && temp->next!= NULL)
-                        temp = temp->next;
-                    while (strcmp(line, "endmcro\n") != 0) {
-                        if (strcmp(lineData->command, "mcro") == 0) {
-                            temp->lines = (struct list*)malloc(sizeof(struct list));
-                            fgets(line, sizeof(line), fp);
-                        }
-                        else {
-                           
-                            strcat(temp->lines, line);
-                            fgets(line, sizeof(line), fp);
-                        }
+                    mcroCount++;
+                    if (!head_mcro)
+                    {
+                        head_mcro = (struct macro*)calloc(mcroCount, sizeof(struct macro));
+                        if (head_mcro == NULL)return NULL;
                     }
-                    p = temp;
-                    goto START;
+                    else
+                    {
+                        tempMcro= (struct macro*)calloc(mcroCount, sizeof(struct macro));
+                        if (!tempMcro)return NULL;
+                        for (i = 0; i < mcroCount - 1; i++)
+                        {
+                            tempMcro[i] = head_mcro[i];
+                        }
+                        head_mcro = tempMcro;
+                    }
+                    p = &head_mcro[mcroCount - 1];
+                    p->name = lineData->paramA;
+                    macroFlag = 1;
                 }
-            }
-            /*print lines*/
-            if (lineData->lable != NULL && lineData->command != NULL && lineData->paramA != NULL && lineData->paramB != NULL)
-                fprintf(fileData.fpw, "%s: %s %s,%s\n", lineData->lable, lineData->command, lineData->paramA, lineData->paramB);
-            else if (lineData->command != NULL && lineData->paramA != NULL && lineData->paramB != NULL)
-                fprintf(fileData.fpw, "%s %s,%s\n", lineData->command, lineData->paramA, lineData->paramB);
-            else if (lineData->command != NULL && lineData->paramA != NULL )
-                fprintf(fileData.fpw, "%s %s\n", lineData->command, lineData->paramA);
-            else if (lineData->command != NULL) {
-                while (p != NULL) {
-                    if (strcmp(p->value, lineData->command) == 0) {
-                        fprintf(fileData.fpw, "%s", p->lines);
-                        break;
-                    } else
-                        p = p->next;
+                if (macroFlag != 0)
+                {
+                    if (macroFlag == 1)
+                        macroFlag = 2;
+                    else
+                    {
+                        if (strcmp(lineData->command, "endmcro") == 0)
+                            macroFlag = 0;
+                        else
+                        {
+                             p = &head_mcro[mcroCount - 1];
+                            if (p->content == NULL)
+                                p->content = lineData;
+                            else
+                                append(p->content, lineData);
+                        }
+                        
+                    }
                 }
+                else
+                {   
+                    for (i = 0; i < mcroCount; i++)
+                    {
+                       p = &head_mcro[i];
+                        if (strcmp(lineData->command, p->name) == 0)
+                            lineData = p->content;
+                    }
+                    if (lineDataHead == NULL)
+                        lineDataHead = lineData;
+                    else
+                    {
+
+                        append(lineDataHead, lineData);
+                    }
+                   pr= lineData;
+                    while (pr)
+                    {
+
+                        /*print lines*/
+                        char tmp1[MAX_SIZE];
+                        strcpy(tmp1, "");
+                        if (pr->lable)
+                        {
+                            strcat(tmp1,pr->lable);
+                            strcat(tmp1, ": ");
+                        }
+                        if (pr->command != NULL)
+                        {
+                            strcat(tmp1, pr->command);
+                        }
+                        if (pr->paramA != NULL)
+                        {
+                            strcat(tmp1, " ");
+                            strcat(tmp1, pr->paramA);
+                        }
+                        if (pr->paramB != NULL)
+                        {
+                            strcat(tmp1, ",");
+                            strcat(tmp1, pr->paramB);
+                        }
+                        fprintf(fileData.fpw, "%s\n", tmp1);
+                        pr = pr->next;
+                    }
+
+                }
+                
+               
             }
-            printf("Printing the labels:\n");
-            printList(lineData->head_lable);
-            freeList(lineData->head_lable);
         }
+            printf("Printing the labels:\n");
+            printList(lineData);
+       
         fclose(fp);
         fclose(fileData.fpw);
-    } else {
-        printf("file %s does not exist\n", argv[count]);
     }
+    else
+        printf("file %s does not exist\n", argv[count]);
     printf("Printing the macros:\n");
-    printList(head_mcro);
-    freeList(head_mcro);
-    return fileData.name;
+    printListM(head_mcro);
+    /*freeListM(head_mcro); */
+    return lineDataHead;
 }

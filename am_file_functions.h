@@ -1,12 +1,12 @@
+
 /*This is header file for pre assembly level*/
-struct list
+struct macro
 {
- 	 char *value;
-    struct list *next;
-    int decimal;
-    char *lines;
+ 	 char *name;
+    struct LineData* content;
 };
 void removeWhiteSpace(char *str);
-struct list *append(struct list *head, char *label);
-void printList(struct list *head) ;
-void freeList(struct list *head);
+void append(struct  LineData*head, struct  LineData*label);
+void printList(struct LineData*head) ;
+void printListM(struct macro* head);
+void freeList(struct LineData*head);

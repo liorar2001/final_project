@@ -1,4 +1,5 @@
 #include "am_file_functions.h"
+#include "general_functions.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -20,50 +21,42 @@ void removeWhiteSpace(char *str) {
     *dst = '\0';
     }
 }
-struct list* append(struct list* head, char* node) {
-    struct list* newp = (struct list*)malloc(sizeof(struct list));
-    if (newp == NULL) {
-        printf("Could not find free memory for malloc\n");
-        return head; // Return the original list if memory allocation fails
-    }
-    newp->decimal = NULL;
-    newp->lines = NULL;
-    newp->next = NULL;
-    newp->value = NULL;
-    // Allocate memory for the value field and copy the content of 'node' into it
-    newp->value = (char*)malloc(strlen(node) + 1);
-    if (newp->value == NULL) {
-        printf("Could not find free memory for value\n");
-        free(newp);
-        return head; // Return the original list if memory allocation fails
-    }
-    strcpy(newp->value, node);
-    newp->next = NULL;
-    if (head == NULL) {
-        head = newp;
-    }
-    else {
-        struct list* temp = head;
-        while (temp->next != NULL) {
+void append(struct  LineData* head, struct  LineData* node)
+{
+        struct LineData* temp = head;
+        while (temp->next) {
             temp = temp->next;
         }
-        temp->next = newp;
-    }
-    return head;
+        temp->next = node;
 }
-void printList(struct list *head) {
-    struct list *temp = head;
+void printList(struct LineData*head) {
+    struct LineData*temp = head;
     while (temp != NULL) {
-        printf("%s: %s\n", temp->value,temp->lines);
+        printf("%s: %s\n", temp->command,temp->paramA);
         temp = temp->next;
     }
 }
-void freeList(struct list *head) {
-    struct list *temp;
-    while (head != NULL) {
-        temp = head;
-        head = head->next;
-        free(temp->value);
-        free(temp);
+void printListM(struct macro* head) {
+    struct LineData* temp = head->content;
+    while (temp != NULL) {
+        printf("%s: %s\n", temp->command, temp->paramA);
+        temp = temp->next;
     }
 }
+void freeList(struct LineData* head) 
+{
+    if (head)
+    {
+        struct LineData* temp = head->next;
+        while (temp != NULL)
+        {
+            free(head);
+            head = temp;
+            temp = head->next;
+        }
+    }
+}
+void freeListM(struct macro* head) 
+{
+        freeList(head->content);
+ }
