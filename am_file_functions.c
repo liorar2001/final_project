@@ -31,8 +31,9 @@ void append(struct  LineData* head, struct  LineData* node)
 }
 void printList(struct LineData*head) {
     struct LineData*temp = head;
-    while (temp != NULL) {
-        printf("%s: %s\n", temp->command,temp->paramA);
+    while (temp != NULL ) {
+        if(temp->lable!=NULL)
+        printf("%s\n", temp->lable);
         temp = temp->next;
     }
 }

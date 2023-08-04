@@ -17,16 +17,17 @@ struct LineData* am_logic(int argc, char* argv[], int count) {
     
     struct LineData* lineData=NULL;
     struct LineData* lineDataHead=NULL;
-    struct FileData fileData;
+    struct FileData* fileData = NULL;
     struct macro* p;
      struct LineData* pr;
      struct macro* tempMcro ;
     int macroFlag = 0;
+    char* name = argv[count];
     /*open input file */
-    fp = fopen(argv[count], "r");
+    fp = fopen(name, "r");
     if (fp != NULL)
     {
-        fileData = open_file(".am", fpw, argv, count); /*open am file */
+        fileData = open_file(".am",name); /*open am file */
         while (fgets(line, MAX_SIZE, fp))
         {
             /*divide into parts*/
@@ -41,9 +42,11 @@ struct LineData* am_logic(int argc, char* argv[], int count) {
                 {
                     if (check_operands(lineData->paramA) == -1) {
                         printf("Error, mcro name invalid");
-                        remove(fileData.name);
                         fclose(fp);
-                        fclose(fileData.fpw);
+                        if(fileData->fpw!=NULL)
+                        fclose(fileData->fpw);
+                        if(fileData->name!=NULL)
+                        remove(fileData->name);
                         return NULL;
                     }
                     mcroCount++;
@@ -126,7 +129,8 @@ struct LineData* am_logic(int argc, char* argv[], int count) {
                             strcat(tmp1, ",");
                             strcat(tmp1, pr->paramB);
                         }
-                        fprintf(fileData.fpw, "%s\n", tmp1);
+                        if(fileData->fpw!=NULL)
+                        fprintf(fileData->fpw, "%s\n", tmp1);
                         pr = pr->next;
                     }
 
@@ -139,7 +143,8 @@ struct LineData* am_logic(int argc, char* argv[], int count) {
             printList(lineData);
        
         fclose(fp);
-        fclose(fileData.fpw);
+        if(fileData->fpw!=NULL)
+        fclose(fileData->fpw);
     }
     else {
         printf("file %s does not exist\n", argv[count]);

@@ -9,33 +9,24 @@ struct entext_list {
     char* value;
     struct entext_list* next;
 };
-struct entext_list* append_entext(struct entext_list* head, char* node) {
-    struct entext_list* newp = (struct entext_list*)malloc(sizeof(struct entext_list));
-    if (newp == NULL) {
-        printf("Could not find free memory for malloc\n");
-        return head; /* Return the original list if memory allocation fails */
-    } 
-    newp->lineNumber = 0;
-    newp->value = node;
-
-    newp->next = NULL;
-    if (head == NULL) {
-        head = newp;
+void append_entext(struct entext_list* head, char* node,int address) 
+{
+    struct entext_list* temp = head;
+    while (temp->next!=NULL) 
+    {
+        temp = temp->next;
     }
-    else {
-        struct entext_list* temp = head;
-        while (temp->next != NULL) {
-            temp = temp->next;
-        }
-        temp->next = newp;
-    }
-    return head;
+    temp->next = malloc(sizeof(struct entext_list));
+    temp->next->value = node;
+    temp->next->next = NULL;
+    temp->next->lineNumber = address;
 }
 
-void printList_entext(struct entext_list* head) {
+void printList_entext(struct entext_list* head,FILE *fp) {
     struct entext_list* temp = head;
     while (temp != NULL) {
         printf("%s: %d\n", temp->value, temp->lineNumber);
+        fprintf(fp,"%s: %d\n", temp->value, temp->lineNumber);
         temp = temp->next;
     }
 }
@@ -48,3 +39,4 @@ void freeList_entext(struct entext_list* head) {
         free(temp);
     }
 }
+//void check_argument()

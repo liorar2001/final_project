@@ -11,7 +11,6 @@ int main(int argc, char* argv[]){
         am_file=am_logic(argc,argv,count-1); /*build am file*/
         if(am_file!=0)
         searchEntry(am_file,argv,count-1);
-
         count++;
     }
     return 0;

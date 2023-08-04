@@ -5,13 +5,20 @@
 #include "general_functions.h"
 #include "am_file_functions.h"
 #define MAX_SIZE 81
-struct FileData open_file(char *extension, FILE *fpw, char *argv[], int count) {
-   struct FileData fileData;
-    fileData.name = argv[count];
-    strcat(fileData.name, extension);
-    fileData.fpw = fopen(fileData.name, "w+");
+struct FileData* open_file(char *extension,char* name) {
+   struct FileData* fileData=malloc(sizeof(struct FileData));
+   char* fname = malloc(sizeof(name));
+   strcpy(fname,name);
+   if (fileData)
+   {
+      // name = strtok(name, ".");
+       strcat(fname, extension);
+       fileData->fpw = fopen(fname, "w+");
+       fileData->name = fname;
+   }
     return fileData;
 }
+
 struct LineData* divide_line(char line[]) {
     struct LineData *lineData =(struct LineData*) malloc(sizeof(struct LineData));
     char *token;
@@ -47,8 +54,8 @@ struct LineData* divide_line(char line[]) {
     return lineData;
 }
 int check_operands(char *param) {
-    char twoOperands[][4] = {"mov", "cmp", "add", "sub", "lea"};
-    char oneOperands[][4] = {"not", "clr", "inc", "dec", "jmp", "bne", "red", "prn", "jsr"};
+    char twoOperands[][4] = {"mov", "cmp", "add", "lea"};
+    char oneOperands[][4] = {"not", "clr", "inc", "dec", "jmp", "bne", "red", "prn", "jsr", "sub" };
     char noOperands[][4] = {"rts", "stop"};
     int i;
     for (i = 0; i < sizeof(twoOperands) / sizeof(twoOperands[0]); i++) {

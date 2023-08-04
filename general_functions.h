@@ -9,7 +9,7 @@ struct LineData {
     char *paramB;
     struct LineData* next;
 };
-struct FileData open_file(char *extention,FILE *fpw,char* argv[],int count);
+struct FileData* open_file(char *extention,char*name);
 struct LineData* divide_line(char* line);
 int check_operands(char *param);
 
