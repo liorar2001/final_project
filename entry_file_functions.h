@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
-void searchEntry(struct LineData* LineDataHead,char *argv[],int count);
+void searchEntryAndExtern(struct LineData* LineDataHead,char *argv[],int count);
 struct entext_list {
     int lineNumber;
     char* value;
@@ -39,4 +39,3 @@ void freeList_entext(struct entext_list* head) {
         free(temp);
     }
 }
-//void check_argument()
