@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "general_functions.h"
-#include "am_file_functions.h"
 #define MAX_SIZE 81
 struct FileData* open_file(char *extension,char* name) {
    struct FileData* fileData=malloc(sizeof(struct FileData));
@@ -37,14 +36,20 @@ struct LineData* divide_line(char line[]) {
             /* Divide by colons */
             lineData->lable = strtok(token, ":");
             token = strtok(NULL, ":");
-            /* append(lineData, lineData->lable); */
-        } 
-        /* Divide by comma */
-        lineData->command = strtok(token, ",");
-        lineData->paramB = strtok(NULL, ",");
-        /* Divide by spaces */
-        token = strtok(lineData->command, " ");
-        lineData->paramA = strtok(NULL, " ");
+        }
+        if (contains(token,".data")==1|| contains(token, ".data") == 1){
+            /* Divide by spaces */
+            lineData->command = strtok(token, " ");
+            lineData->paramA = strtok(NULL, " ");
+        }
+        else {
+            /* Divide by comma */
+            lineData->command = strtok(token, ",");
+            lineData->paramB = strtok(NULL, ",");
+            /* Divide by spaces */
+            token = strtok(lineData->command, " ");
+            lineData->paramA = strtok(NULL, " ");
+        }
         /* Remove white characters */
         removeWhiteSpace(lineData->lable);
         removeWhiteSpace(lineData->command);
@@ -75,3 +80,26 @@ int check_operands(char *param) {
     }
     return 1;
 }
+int contains(const char* str, const char* substr) {
+    if (str == NULL || substr == NULL) {
+        // Handle NULL inputs (optional, depending on your requirements)
+        return 0;
+    }
+
+    size_t str_len = strlen(str);
+    size_t substr_len = strlen(substr);
+
+    if (str_len < substr_len) {
+        // The substring cannot exist in a string that is shorter than the substring
+        return 0;
+    }
+
+    for (size_t i = 0; i <= str_len - substr_len; i++) {
+        if (strncmp(str + i, substr, substr_len) == 0) {
+            return 1; // Substring found at position i
+        }
+    }
+
+    return 0; // Substring not found
+}
+

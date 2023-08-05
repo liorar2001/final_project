@@ -1,5 +1,3 @@
-#include "am_file_functions.h"
-#include "am_file_logic.h"
 #include "general_functions.h"
 #include <stdio.h>
 #include <string.h>
@@ -105,9 +103,7 @@ struct LineData* am_logic(int argc, char* argv[], int count) {
                     }
                    pr= lineData;
                     while (pr)
-                    {
-
-                        /*print lines*/
+                    {     /*print lines*/
                         char tmp1[MAX_SIZE];
                         strcpy(tmp1, "");
                         if (pr->lable)

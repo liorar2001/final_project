@@ -1,1 +1,0 @@
-struct LineData* am_logic(int argc, char* argv[],int count);

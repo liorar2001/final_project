@@ -1,11 +1,12 @@
-#include "entry_file_functions.h"
-#include "am_file_functions.h"
+#include "general_functions.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
 #define MAX_SIZE 81
-void searchEntryAndExtern(struct LineData* LineDataHead, char* argv[], int count) {
+
+
+struct lists* searchEntryAndExtern(struct LineData* LineDataHead, char* argv[], int count) {
     int IC = 0, DC = 0, flagEnt = 0, flagExt = 0;
     struct LineData* lineData = NULL;
     struct entext_list* entList = NULL;
@@ -37,29 +38,39 @@ void searchEntryAndExtern(struct LineData* LineDataHead, char* argv[], int count
                 append_entext(ent_head, lineData->paramA, 0);
             else {
                 ent_head = malloc(sizeof(struct entext_list));
-                if (ent_head) {
+                if (ent_head!=NULL) {
                     ent_head->value = lineData->paramA;
                     ent_head->next = NULL;
                     ent_head->lineNumber = 0;
                 }
             }
             flagEnt = 1;
-            DC++;
         }
         else if (strcmp(lineData->command, ".extern") == 0) {
             if (ext_head != NULL)
                 append_entext(ext_head, lineData->paramA, 0);
             else {
                 ext_head = malloc(sizeof(struct entext_list));
-                if (ext_head) {
+                if (ext_head!=NULL) {
                     ext_head->value = lineData->paramA;
                     ext_head->next = NULL;
                     ext_head->lineNumber = 0;
                 }
             }
             flagExt = 1;
-            DC++;
         }
+    /* else if (strcmp(lineData->command, ".string") == 0 || strcmp(lineData->command, ".data") == 0)
+        {
+            
+            int count = 0,i=0;
+            if (strcmp(lineData->command, ".data") == 0)
+            {
+                char* line = malloc(sizeof(lineData->paramA));
+                strcpy(line, lineData->paramA);
+                char* data = strtok(line, ",");
+            }
+           
+        } */
         else { // it's an order
             if (!orderList)
                 orderList = lineData;
@@ -73,7 +84,7 @@ void searchEntryAndExtern(struct LineData* LineDataHead, char* argv[], int count
                     append_entext(orderLablesList, lineData->paramA, lineNum + IC);
                 else {
                     orderLablesList = malloc(sizeof(struct entext_list));
-                    if (orderLablesList) {
+                    if (orderLablesList!=NULL) {
                         orderLablesList->value = lineData->paramA;
                         orderLablesList->next = NULL;
                         orderLablesList->lineNumber = lineNum + IC;
@@ -88,7 +99,7 @@ void searchEntryAndExtern(struct LineData* LineDataHead, char* argv[], int count
                     append_entext(orderLablesList, lineData->paramB, lineNum + IC);
                 else {
                     orderLablesList = malloc(sizeof(struct entext_list));
-                    if (orderLablesList) {
+                    if (orderLablesList!=NULL) {
                         orderLablesList->value = lineData->paramB;
                         orderLablesList->next = NULL;
                         orderLablesList->lineNumber = lineNum + IC;
@@ -101,7 +112,7 @@ void searchEntryAndExtern(struct LineData* LineDataHead, char* argv[], int count
                 append_entext(LableList, lineData->lable, lineNum + IC);
             else if (LableList == NULL) {
                 LableList = malloc(sizeof(struct entext_list));
-                if (LableList) {
+                if (LableList!=NULL) {
                     LableList->value = lineData->lable;
                     LableList->next = NULL;
                     LableList->lineNumber = lineNum + IC;
@@ -145,7 +156,7 @@ void searchEntryAndExtern(struct LineData* LineDataHead, char* argv[], int count
                     append_entext(externP, orderLablesList->value, orderLablesList->lineNumber);
                 else {
                     externP = malloc(sizeof(struct entext_list));
-                    if (externP) {
+                    if (externP!=NULL) {
                         externP->value = orderLablesList->value;
                         externP->next = NULL;
                         externP->lineNumber = orderLablesList->lineNumber;
@@ -171,11 +182,48 @@ void searchEntryAndExtern(struct LineData* LineDataHead, char* argv[], int count
         fclose(fileExt->fpw);
         remove(fileExt->name);
     }
-
+    struct lists* list = malloc(sizeof(struct lists));
+    list->entry = ent_head;
+    list->external = externP;
+    list->orders = orderList;
     // Print results to files
     printList_entext(ent_head, fileEnt->fpw);
     printf("--------------------------\n");
     printList_entext(externP, fileExt->fpw);
+    printf("IC=%d DC=%d\n",IC-=DC,DC);
+
+    return list;
 }
 
+void append_entext(struct entext_list* head, char* node, int address)
+{
+    struct entext_list* temp = head;
+    while (temp->next != NULL)
+    {
+        temp = temp->next;
+    }
+    temp->next = malloc(sizeof(struct entext_list));
+    if (temp->next != NULL) {
+        temp->next->value = node;
+        temp->next->next = NULL;
+        temp->next->lineNumber = address;
+    }
+}
+void printList_entext(struct entext_list* head, FILE* fp) {
+    struct entext_list* temp = head;
+    while (temp != NULL) {
+        printf("%s: %d\n", temp->value, temp->lineNumber);
+        fprintf(fp, "%s: %d\n", temp->value, temp->lineNumber);
+        temp = temp->next;
+    }
+}
+void freeList_entext(struct entext_list* head) {
+    struct entext_list* temp;
+    while (head != NULL) {
+        temp = head;
+        head = head->next;
+        free(temp->value);
+        free(temp);
+    }
+}
   
