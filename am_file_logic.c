@@ -9,7 +9,7 @@ struct LineData* am_logic(int argc, char* argv[], int count) {
     int i;
 
     char line[MAX_SIZE];
-    FILE *fp, *fpw=NULL;
+    FILE *fp=NULL;
     struct macro* head_mcro = NULL;
     int mcroCount = 0;
     
@@ -148,6 +148,5 @@ struct LineData* am_logic(int argc, char* argv[], int count) {
     }
     printf("Printing the macros:\n");
     printListM(head_mcro);
-    /*freeListM(head_mcro); */
     return lineDataHead;
 }

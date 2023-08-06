@@ -14,8 +14,8 @@ int main(int argc, char* argv[]){
        if(orderlist!=NULL)
         makeObjFile(orderlist);
 
-       // printf("binary- %s",decimalToBinary(3));
-        //printf("base 64- %s",binaryToBase64("000111110110"));
+       /* printf("binary- %s",decimalToBinary(3));
+        printf("base 64- %s",binaryToBase64("000111110110"));*/
         count++;
     }
     return 0;

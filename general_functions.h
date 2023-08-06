@@ -35,12 +35,13 @@ struct binaryInstruct {
     char* source;
     char* binNum;
 };
-//obj file
-void makeObjFile(struct LineData* orderlist);
+/*obj file */
+void makeObjFile(struct lists* orderlist);
 char* decimalToBinary(int num);
-char* binaryToBase64(const unsigned char* binaryData);
+char* binaryToBase64(const char* binaryString);
 char* ARE(char* param, int operand, struct entext_list* entry, struct entext_list* external);
-int SearchOperand(char* param, char* opcode);
+int SearchOperand(char* param, char opcode[][5]);
+int dataType(char* param);
 
 void removeWhiteSpace(char* str);
 void append(struct  LineData* head, struct  LineData* label);

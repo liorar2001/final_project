@@ -9,8 +9,6 @@
 struct lists* searchEntryAndExtern(struct LineData* LineDataHead, char* argv[], int count) {
     int IC = 0, DC = 0, flagEnt = 0, flagExt = 0;
     struct LineData* lineData = NULL;
-    struct entext_list* entList = NULL;
-    struct entext_list* extList = NULL;
     struct LineData* orderList = NULL;
     struct entext_list* LableList = NULL;
     struct entext_list* orderLablesList = NULL;
@@ -23,6 +21,7 @@ struct lists* searchEntryAndExtern(struct LineData* LineDataHead, char* argv[], 
     struct entext_list* tempLblOrder = NULL;
     struct FileData* fileEnt = NULL;
     struct FileData* fileExt = NULL;
+    struct lists* list = malloc(sizeof(struct lists));
     int lineNum = 100;
     char* name = argv[count];
 
@@ -71,12 +70,12 @@ struct lists* searchEntryAndExtern(struct LineData* LineDataHead, char* argv[], 
             }
            
         } */
-        else { // it's an order
+        else { /*it's an order*/
             if (!orderList)
                 orderList = lineData;
 
-            // Make a list of labels in orders
-            // Check param A if letter
+            /* Make a list of labels in orders*/
+            /* Check param A if letter*/
             if (lineData->paramA != NULL &&
                 ((lineData->paramA[0] >= 'a' && lineData->paramA[0] <= 'z') ||
                     (lineData->paramA[0] >= 'A' && lineData->paramA[0] <= 'Z'))) {
@@ -91,7 +90,7 @@ struct lists* searchEntryAndExtern(struct LineData* LineDataHead, char* argv[], 
                     }
                 }
             }
-            // Check param B
+            /* Check param B*/
             else if (lineData->paramB != NULL &&
                 ((lineData->paramB[0] >= 'a' && lineData->paramB[0] <= 'z') ||
                     (lineData->paramB[0] >= 'A' && lineData->paramB[0] <= 'Z'))) {
@@ -107,7 +106,7 @@ struct lists* searchEntryAndExtern(struct LineData* LineDataHead, char* argv[], 
                 }
             }
 
-            // Make label list
+            /* Make label list*/
             if (LableList != NULL && lineData->lable != NULL)
                 append_entext(LableList, lineData->lable, lineNum + IC);
             else if (LableList == NULL) {
@@ -119,19 +118,19 @@ struct lists* searchEntryAndExtern(struct LineData* LineDataHead, char* argv[], 
                 }
             }
 
-            // Next instruction
+            /* Next instruction */
             IC = IC + check_operands(lineData->command);
         }
 
-        // Next line
+        /* Next line*/
         lineData = lineData->next;
     }
 
-    // Return to default positions
+    /* Return to default positions*/
     tempEnt = ent_head;
     tempLbl = LableList;
 
-    // Check entry labels
+    /* Check entry labels*/
     while (ent_head != NULL && LableList != NULL) {
         if (strcmp(ent_head->value, LableList->value) == 0) {
             ent_head->lineNumber = LableList->lineNumber;
@@ -144,8 +143,8 @@ struct lists* searchEntryAndExtern(struct LineData* LineDataHead, char* argv[], 
     ent_head = tempEnt;
     LableList = tempLbl;
 
-    // Check external labels
-    // Return to default positions
+    /* Check external labels*/
+    /* Return to default positions*/
     tempExt = ext_head;
     tempLblOrder = orderLablesList;
 
@@ -173,7 +172,7 @@ struct lists* searchEntryAndExtern(struct LineData* LineDataHead, char* argv[], 
     ext_head = tempExt;
     orderLablesList = tempLblOrder;
 
-    // Cleanup and finalize the files
+    /* Cleanup and finalize the files*/
     if (flagEnt == 0 && fileEnt->name != NULL) {
         fclose(fileEnt->fpw);
         remove(fileEnt->name);
@@ -182,11 +181,10 @@ struct lists* searchEntryAndExtern(struct LineData* LineDataHead, char* argv[], 
         fclose(fileExt->fpw);
         remove(fileExt->name);
     }
-    struct lists* list = malloc(sizeof(struct lists));
     list->entry = ent_head;
     list->external = externP;
     list->orders = orderList;
-    // Print results to files
+    /* Print results to files*/
     printList_entext(ent_head, fileEnt->fpw);
     printf("--------------------------\n");
     printList_entext(externP, fileExt->fpw);

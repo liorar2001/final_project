@@ -10,7 +10,6 @@ struct FileData* open_file(char *extension,char* name) {
    strcpy(fname,name);
    if (fileData)
    {
-      // name = strtok(name, ".");
        strcat(fname, extension);
        fileData->fpw = fopen(fname, "w+");
        fileData->name = fname;
@@ -81,25 +80,25 @@ int check_operands(char *param) {
     return 1;
 }
 int contains(const char* str, const char* substr) {
-    if (str == NULL || substr == NULL) {
-        // Handle NULL inputs (optional, depending on your requirements)
-        return 0;
-    }
-
     size_t str_len = strlen(str);
     size_t substr_len = strlen(substr);
-
-    if (str_len < substr_len) {
-        // The substring cannot exist in a string that is shorter than the substring
+    size_t i ;
+    if (str == NULL || substr == NULL) {
+        /* Handle NULL inputs (optional, depending on your requirements) */
         return 0;
     }
 
-    for (size_t i = 0; i <= str_len - substr_len; i++) {
+    if (str_len < substr_len) {
+        /*The substring cannot exist in a string that is shorter than the substring*/
+        return 0;
+    }
+
+    for (i = 0; i <= str_len - substr_len; i++) {
         if (strncmp(str + i, substr, substr_len) == 0) {
-            return 1; // Substring found at position i
+            return 1; /*Substring found at position i*/
         }
     }
 
-    return 0; // Substring not found
+    return 0; /*Substring not found*/
 }
 
