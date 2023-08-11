@@ -6,18 +6,24 @@
 const char base64_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 char opcode[][5] = { "mov","cmp","add","sub","not","clr","lea",
                             "inc","dec","jmp","bne","red","prn","jsr","rts","stop" };
-void makeObjFile(struct lists* orderlist)
+void makeObjFile(struct lists* orderlist ,char* argv[], int count)
 {
     struct LineData* lineData = NULL;
     struct entext_list* lablep = NULL;
+    struct FileData* fileObj = NULL;
     char* param1=NULL;
     char* param2;
     char* Bin1;
     char* p;
+    char* name = argv[count];
+    char* token=NULL;
+    int i;
     lineData = orderlist->orders;
+    fileObj = open_file(".obj", name);
+    fprintf(fileObj->fpw, "%d %d\n",IC,DC);
     while (lineData)
-    {       
-        if(lineData->command[0]!='.')
+    {
+        if (lineData->command[0] != '.')
         {
             if (lineData->paramA != NULL && lineData->paramB == NULL)
             {
@@ -25,27 +31,27 @@ void makeObjFile(struct lists* orderlist)
                 lineData->paramA = NULL;
             }
             Bin1 = general_code(lineData);
-            printf("%s\n", binaryToBase64(Bin1));
+            fprintf(fileObj->fpw, "%s\n", binaryToBase64(Bin1));
             if (lineData->paramA != NULL)
             {
                 p = &lineData->paramA[2];
                 switch (dataType(lineData->paramA))
                 {
-                   
+
                 case 5: /*register*/
-                   
+
                     param1 = decimalToBinary(atoi(p), 5);
                     if (dataType(lineData->paramB) != 5)
                     {
                         strcat(param1, "00000");
                         strcat(param1, "00");
-                        printf("%s\n", binaryToBase64(param1));
+                        fprintf(fileObj->fpw, "%s\n", binaryToBase64(param1));
                     }
                     break;
                 case 1: /*number*/
                     param1 = decimalToBinary(atoi(lineData->paramA), 10);
                     strcat(param1, "00");
-                    printf("%s\n", binaryToBase64(param1));
+                    fprintf(fileObj->fpw, "%s\n", binaryToBase64(param1));
                     break;
                 case 3: /*lable*/
                     lablep = orderlist->Lables;
@@ -58,9 +64,9 @@ void makeObjFile(struct lists* orderlist)
                         }
                         lablep = lablep->next;
                     }
-                    if(lablep!=NULL)
-                    strcat(param1, ARE(lablep->value, orderlist));
-                    printf("%s\n", binaryToBase64(param1));
+                    if (lablep != NULL)
+                        strcat(param1, ARE(lablep->value, orderlist));
+                    fprintf(fileObj->fpw, "%s\n", binaryToBase64(param1));
                     break;
                 default:
                     break;
@@ -72,25 +78,25 @@ void makeObjFile(struct lists* orderlist)
                 switch (dataType(lineData->paramB))
                 {
                 case 5: /*register*/
-                    
+
                     param2 = decimalToBinary(atoi(p), 5);
                     if (dataType(lineData->paramA) == 5)
                     {
-                        strcat(param2, "00000");
-                        strcat(param2, "00");
-                        printf("%s\n", binaryToBase64(param2));
+                        strcat(param1, param2);
+                        strcat(param1, "00");
+                        fprintf(fileObj->fpw, "%s\n", binaryToBase64(param1));
                     }
                     else
                     {
                         strcat(param2, "00000");
                         strcat(param2, "00");
-                        printf("%s\n", binaryToBase64(param2));
+                        fprintf(fileObj->fpw, "%s\n", binaryToBase64(param2));
                     }
                     break;
                 case 1: /*number*/
                     param2 = decimalToBinary(atoi(lineData->paramB), 10);
                     strcat(param2, "00");
-                    printf("%s\n", binaryToBase64(param2));
+                    fprintf(fileObj->fpw, "%s\n", binaryToBase64(param2));
                     break;
                 case 3: /*lable*/
                     lablep = orderlist->Lables;
@@ -105,40 +111,67 @@ void makeObjFile(struct lists* orderlist)
                         lablep = lablep->next;
                     }
                     strcat(param2, ARE(lineData->paramB, orderlist));
-                    printf("%s\n", binaryToBase64(param2));
+                    fprintf(fileObj->fpw, "%s\n", binaryToBase64(param2));
                     break;
                 default:
                     break;
                 }
             }
         }
+        else {
+            if (strcmp(lineData->command, ".string") == 0) {
+                i = 1;
+                param1 = lineData->paramA;
+                while (param1[i]!='"')
+                {
+                    fprintf(fileObj->fpw,"%s\n", binaryToBase64(decimalToBinary((int)(param1[i]), 12)));
+                    i++;
+                }
+                fprintf(fileObj->fpw, "%s\n", binaryToBase64(decimalToBinary((int)('\0'), 12)));
+            }
+
+            else if (strcmp(lineData->command, ".data") == 0) {
+                param1 = lineData->paramA;
+               token = strtok(param1, ",");
+                while (token != NULL)
+                {
+                    fprintf(fileObj->fpw, "%s\n", binaryToBase64(decimalToBinary(atoi(token), 12)));
+                    token = strtok(NULL ,",");
+                }
+            } 
+
+        }
         lineData = lineData->next;
     }
+    fclose(fileObj->fpw);
 }
-
-char* decimalToBinary(int num,int digits) {
-int i;
-    char* binaryString = (char*)malloc(13); /* digits bits + null-terminator*/
+char* decimalToBinary(int num, int digits) {
+    int i;
+    char* binaryString = (char*)malloc(13); /* digits bits + null-terminator */
 
     if (binaryString == NULL) {
         printf("Memory allocation failed.\n");
         return NULL;
     }
 
-    /*Fill the binary string with leading zeros*/
+    /* Handle negative numbers using two's complement */
+    if (num < 0) {
+        num = (1 << digits) + num; /* Convert to positive two's complement */
+    }
+
+    /* Fill the binary string with leading zeros */
     for (i = 0; i < digits; i++) {
         binaryString[i] = '0';
     }
-    binaryString[digits] = '\0'; /* Null-terminate the binary string*/
+    binaryString[digits] = '\0'; /* Null-terminate the binary string */
 
-     i = digits-1;
+    i = digits - 1;
     while (num > 0 && i >= 0) {
         binaryString[i--] = (num % 2) + '0';
         num = num / 2;
     }
     return binaryString;
 }
-
 char* binaryToBase64(const char* binaryString) 
 {
  int i = 0, j = 0;
@@ -235,4 +268,3 @@ char* general_code(struct LineData* lineData)
         strncat(source,dest,5);
 return source;
 }
-

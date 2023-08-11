@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
-
+int IC, DC;
 /*structs*/
 struct LineData {
     char *lable;
@@ -40,7 +40,7 @@ struct binaryInstruct {
 };
 
 /*obj file */
-void makeObjFile(struct lists* orderlist);
+void makeObjFile(struct lists* orderlist ,char* argv[], int count);
 char* decimalToBinary(int num, int digits);
 char* binaryToBase64(const char* binaryString);
 char* ARE(char* param, struct lists* list);

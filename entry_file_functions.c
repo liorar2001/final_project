@@ -4,10 +4,8 @@
 #include <stdlib.h>
 #include <ctype.h>
 #define MAX_SIZE 81
-
-
 struct lists* searchEntryAndExtern(struct LineData* LineDataHead, char* argv[], int count) {
-    int IC = 0, DC = 0, flagEnt = 0, flagExt = 0;
+    int flagEnt = 0, flagExt = 0;
     struct LineData* lineData = NULL;
     struct LineData* orderList = NULL;
     struct entext_list* LableList = NULL;
@@ -26,8 +24,6 @@ struct lists* searchEntryAndExtern(struct LineData* LineDataHead, char* argv[], 
     char* name = argv[count];
     char*token;
     char *param;
-
-    printf("#### search entry ###\n");
     fileEnt = open_file(".ent", name); /*open ent file*/
     fileExt = open_file(".ext", name); /*open ext file*/
     lineData = LineDataHead;
@@ -58,18 +54,6 @@ struct lists* searchEntryAndExtern(struct LineData* LineDataHead, char* argv[], 
             }
             flagExt = 1;
         }
-    /* else if (strcmp(lineData->command, ".string") == 0 || strcmp(lineData->command, ".data") == 0)
-        {
-            
-            int count = 0,i=0;
-            if (strcmp(lineData->command, ".data") == 0)
-            {
-                char* line = malloc(sizeof(lineData->paramA));
-                strcpy(line, lineData->paramA);
-                char* data = strtok(line, ",");
-            }
-           
-        } */
         else { /*it's an order*/
             if (!orderList)
                 orderList = lineData;
@@ -105,7 +89,6 @@ struct lists* searchEntryAndExtern(struct LineData* LineDataHead, char* argv[], 
                     }
                 }
             }
-
             /* Make label list*/
             if (LableList != NULL && lineData->lable != NULL)
                 append_entext(LableList, lineData->lable, lineNum + IC);
@@ -117,25 +100,32 @@ struct lists* searchEntryAndExtern(struct LineData* LineDataHead, char* argv[], 
                     LableList->lineNumber = lineNum + IC;
                 }
             }
-
             /* Next instruction */
             step = check_operands(lineData->command);
-	    param=malloc(sizeof(char));
-            param=lineData->paramA;
+            param= lineData->paramA;
+            if (lineData->paramA) {
+                param = malloc(sizeof(char) * strlen(lineData->paramA));
+                strcpy(param, lineData->paramA);
+            }
             if(step==3)
             if (dataType(param) == 5 && dataType(lineData->paramB) == 5)step = 2;          
-            if (strcmp(lineData->command, ".string") == 0)
+            if (strcmp(lineData->command, ".string") == 0) {
                 step = strlen(param) - 1;
+                DC += step;
+            }
             if (strcmp(lineData->command,".data") == 0)
             {
-                step = 0;
+                strcpy(param, lineData->paramA);
+               step = 0;
                 token = strtok(param, ",");
                 while (token != NULL)
                 {
                     /*Get next token:*/
                     token = strtok(NULL, ",");
                     step++;
+                    
                 }
+                DC += step;
             }
             IC = IC + step;
         }
@@ -206,8 +196,7 @@ struct lists* searchEntryAndExtern(struct LineData* LineDataHead, char* argv[], 
     /* Print results to files*/
     printList_entext(ent_head, fileEnt->fpw);
     printList_entext(externP, fileExt->fpw);
-    printf("IC=%d DC=%d\n",IC-=DC,DC);
-
+    IC-=DC;
     return list;
 }
 
@@ -241,4 +230,3 @@ void freeList_entext(struct entext_list* head) {
         free(temp);
     }
 }
-  

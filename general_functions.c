@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include "general_functions.h"
 #define MAX_SIZE 81
+int IC = 0, DC = 0;
 struct FileData* open_file(char *extension,char* name) {
    struct FileData* fileData=malloc(sizeof(struct FileData));
    char* fname = malloc(sizeof(name));
@@ -34,7 +35,7 @@ struct LineData* divide_line(char line[]) {
             lineData->lable = strtok(token, ":");
             token = strtok(NULL, ":");
         }
-        if (contains(token,".data")==1|| contains(token, ".data") == 1){
+        if (contains(token, ".data") == 1){
             /* Divide by spaces */
             lineData->command = strtok(token, " ");
             lineData->paramA = strtok(NULL, " ");
@@ -113,4 +114,3 @@ int dataType(char* param) {
         return 3;
 return 0;
 }
-

@@ -7,12 +7,10 @@
 struct LineData* am_logic(int argc, char* argv[], int count) {
     /* declearations */
     int i;
-
     char line[MAX_SIZE];
     FILE *fp=NULL;
     struct macro* head_mcro = NULL;
     int mcroCount = 0;
-    
     struct LineData* lineData=NULL;
     struct LineData* lineDataHead=NULL;
     struct FileData* fileData = NULL;
@@ -34,7 +32,7 @@ struct LineData* am_logic(int argc, char* argv[], int count) {
             strcpy(tmp, line);
             lineData = divide_line(tmp);
             if (lineData == NULL)return NULL;
-            if (lineData->command!=NULL)
+            if (lineData->command!=NULL && strlen(lineData->command)>1)
             {
                 if (strcmp(lineData->command, "mcro") == 0)
                 {
@@ -98,7 +96,6 @@ struct LineData* am_logic(int argc, char* argv[], int count) {
                         lineDataHead = lineData;
                     else
                     {
-
                         append(lineDataHead, lineData);
                     }
                    pr= lineData;
@@ -131,8 +128,6 @@ struct LineData* am_logic(int argc, char* argv[], int count) {
                     }
 
                 }
-                
-               
             }
         }
         fclose(fp);
