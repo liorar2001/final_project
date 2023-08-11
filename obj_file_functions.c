@@ -4,65 +4,121 @@
 #include <stdlib.h>
 #include <ctype.h>
 const char base64_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+char opcode[][5] = { "mov","cmp","add","sub","not","clr","lea",
+                            "inc","dec","jmp","bne","red","prn","jsr","rts","stop" };
 void makeObjFile(struct lists* orderlist)
 {
-    int i = 0;
     struct LineData* lineData = NULL;
-    struct  binaryInstruct* instruct=NULL;
+    struct entext_list* lablep = NULL;
+    char* param1=NULL;
+    char* param2;
+    char* Bin1;
+    char* p;
     lineData = orderlist->orders;
     while (lineData)
-    {
-        char opcode[][5] = { "mov","cmp","add","sub","not","clr","lea",
-                            "inc","dec","jmp","bne","red","prn","jsr","rts","stop" };
-        for (i = 0; i <=15; i++) 
+    {       
+        if(lineData->command[0]!='.')
         {
-            if (strcmp(lineData->command, opcode[i]) == 0)
+            if (lineData->paramA != NULL && lineData->paramB == NULL)
             {
-                instruct = malloc(sizeof(struct binaryInstruct));
-                 instruct->opcode = decimalToBinary(i);
+                lineData->paramB = lineData->paramA;
+                lineData->paramA = NULL;
+            }
+            Bin1 = general_code(lineData);
+            printf("%s\n", binaryToBase64(Bin1));
+            if (lineData->paramA != NULL)
+            {
+                p = &lineData->paramA[2];
+                switch (dataType(lineData->paramA))
+                {
+                   
+                case 5: /*register*/
+                   
+                    param1 = decimalToBinary(atoi(p), 5);
+                    if (dataType(lineData->paramB) != 5)
+                    {
+                        strcat(param1, "00000");
+                        strcat(param1, "00");
+                        printf("%s\n", binaryToBase64(param1));
+                    }
+                    break;
+                case 1: /*number*/
+                    param1 = decimalToBinary(atoi(lineData->paramA), 10);
+                    strcat(param1, "00");
+                    printf("%s\n", binaryToBase64(param1));
+                    break;
+                case 3: /*lable*/
+                    lablep = orderlist->Lables;
+                    while (lablep != NULL)
+                    {
+                        if (strcmp(lineData->paramB, lablep->value) == 0)
+                        {
+                            param1 = decimalToBinary(lablep->lineNumber, 10);
+                            break;
+                        }
+                        lablep = lablep->next;
+                    }
+                    if(lablep!=NULL)
+                    strcat(param1, ARE(lablep->value, orderlist));
+                    printf("%s\n", binaryToBase64(param1));
+                    break;
+                default:
+                    break;
+                }
+            }
+            if (lineData->paramB != NULL)
+            {
+                char* p = &lineData->paramB[2];
+                switch (dataType(lineData->paramB))
+                {
+                case 5: /*register*/
+                    
+                    param2 = decimalToBinary(atoi(p), 5);
+                    if (dataType(lineData->paramA) == 5)
+                    {
+                        strcat(param2, "00000");
+                        strcat(param2, "00");
+                        printf("%s\n", binaryToBase64(param2));
+                    }
+                    else
+                    {
+                        strcat(param2, "00000");
+                        strcat(param2, "00");
+                        printf("%s\n", binaryToBase64(param2));
+                    }
+                    break;
+                case 1: /*number*/
+                    param2 = decimalToBinary(atoi(lineData->paramB), 10);
+                    strcat(param2, "00");
+                    printf("%s\n", binaryToBase64(param2));
+                    break;
+                case 3: /*lable*/
+                    lablep = orderlist->Lables;
+                    param2 = decimalToBinary(0, 10);
+                    while (lablep != NULL)
+                    {
+                        if (strcmp(lineData->paramB, lablep->value) == 0)
+                        {
+                            param2 = decimalToBinary(lablep->lineNumber, 10);
+                            break;
+                        }
+                        lablep = lablep->next;
+                    }
+                    strcat(param2, ARE(lineData->paramB, orderlist));
+                    printf("%s\n", binaryToBase64(param2));
+                    break;
+                default:
+                    break;
+                }
             }
         }
-        /*check if searchoperand returns lable if yes check in exter or entry list, else 00
-        // use strcat to merge the struct in source and dest take last 3 by array
-        // send strcat to base64 convert next row will be just param A in base64 and then param B */
-      
-        instruct->source = decimalToBinary(SearchOperand(lineData->paramA,opcode));
-        instruct->dest= decimalToBinary(SearchOperand(lineData->paramB,opcode));
-        instruct->ARE =ARE(lineData->command, SearchOperand(lineData->command,opcode), orderlist->entry, orderlist->external);
-        instruct->source = &instruct->source[9];
-        instruct->dest =   &instruct->dest[9];
-        instruct->opcode = &instruct->opcode[8];
-        strcat(instruct->source, instruct->opcode);
-        strcat(instruct->dest, instruct->ARE);
-        strcat(instruct->source, instruct->dest);
-         printf("base64 - %s\n",binaryToBase64(instruct->source));
-         if (lineData->paramA != NULL) {
-             instruct->source = decimalToBinary(atoi(&lineData->paramA[2]));
-             instruct->source = &instruct->source[7];
-
-             if (lineData->paramB != NULL)
-             {
-                 if (dataType(lineData->paramB) == 1)
-                 {
-                     instruct->dest = decimalToBinary(atoi(&lineData->paramA[2]));
-                     instruct->dest = &instruct->dest[7];
-                     strcat(instruct->source, instruct->dest);
-                 }
-                 else
-                 {
-                     strcat(instruct->source, "00000");
-                 }
-                 strcat(instruct->source, ARE(lineData->paramA, SearchOperand(lineData->paramA, opcode), orderlist->entry, orderlist->external));
-             }
-                 printf("base64 - %s\n", binaryToBase64(instruct->source));
-         }
         lineData = lineData->next;
     }
 }
 
-char* decimalToBinary(int num) {
+char* decimalToBinary(int num,int digits) {
 int i;
-    char* binaryString = (char*)malloc(13); /* 12 bits + null-terminator*/
+    char* binaryString = (char*)malloc(13); /* digits bits + null-terminator*/
 
     if (binaryString == NULL) {
         printf("Memory allocation failed.\n");
@@ -70,17 +126,16 @@ int i;
     }
 
     /*Fill the binary string with leading zeros*/
-    for (i = 0; i < 12; i++) {
+    for (i = 0; i < digits; i++) {
         binaryString[i] = '0';
     }
-    binaryString[12] = '\0'; /* Null-terminate the binary string*/
+    binaryString[digits] = '\0'; /* Null-terminate the binary string*/
 
-     i = 11;
+     i = digits-1;
     while (num > 0 && i >= 0) {
         binaryString[i--] = (num % 2) + '0';
         num = num / 2;
     }
-
     return binaryString;
 }
 
@@ -123,60 +178,61 @@ char* binaryToBase64(const char* binaryString)
 
     return base64String;
 }
-int SearchOperand(char* param,char opcode[][5]) {
+int SearchOperand(char* param) {
     int i;
-    if (param != NULL) {
+    if (param != NULL)
+    {
          for (i = 0; i <= 15; i++)
         {
              char(*p)[5] = &opcode[i];
              if (strcmp(*p, param)==0)
-                 return 0;
+                 return i;
         }
-        /*register=5 , number=1,lable=3*/
-        if (dataType(param)== 1)
-            return 5;
-        else if (dataType(param) == 2)
-            return 1;
-        else 
-            return 3;
     }
     else
-        return 0;
-}
-char* ARE(char* param,int operand,struct entext_list* entry, struct entext_list* external){
-   int i;
-    if (operand == 3) /*lable*/
-    {
-        while (entry->value != NULL)
-        {
-            for (i = 0; i <= sizeof(entry); i++)
-                if (strcmp(entry->value, param) == 0)
-                    return "10";
-            entry->value = entry->next->value;
-        }
-        while (external->value != NULL)
-        {
-            for (i = 0; i <= sizeof(external); i++)
-                if (strcmp(external->value, param) == 0)
-                    return "01";
-            external->value = external->next->value;
-        }
-    }
-    else    
-         return "00";
-return "0";
-}
-int dataType(char* param) {
-    /*if register*/
-    char* p = &param[2];
-    if (contains(param, "@r")== 1){
-        if(atoi(p)>=0 && atoi(p)<=7)
-             return 1;
-             }
-    /*if number*/
-    else if (atoi(param)!=0)
-             return 2;
-    else /*lable*/
-                return 3;
+        return -1;
 return 0;
 }
+char* ARE(char* param, struct lists* list){
+   struct entext_list* p1 = list->entry;
+   struct entext_list* p2 = list->external;
+   struct entext_list* p3 = list->Lables;
+        while (p1 != NULL)
+        {
+                if (strcmp(p1->value, param) == 0)
+                    return "10";
+            p1 = p1->next;
+        }
+        while (p2 != NULL)
+        {
+            if (strcmp(p2->value, param) == 0)
+                return "01";
+            p2 = p2->next;
+        }
+        while (p3 != NULL)
+        {
+            if (strcmp(p3->value, param) == 0)
+                return "10";
+            p3 = p3->next;
+        }
+return "Error:This label does not exist!!!";
+}
+
+char* general_code(struct LineData* lineData)
+{
+    char* source= decimalToBinary(0, 3);
+    char* dest = decimalToBinary(0, 3);
+    char* opcode = decimalToBinary(0, 4);
+    char* ARE = "00";
+    if(lineData->paramA!=NULL) source = decimalToBinary(dataType(lineData->paramA),3);
+    if (lineData->paramB != NULL)dest = decimalToBinary(dataType(lineData->paramB),3);
+    if (lineData->command != NULL) opcode =decimalToBinary(SearchOperand(lineData->command),4);
+    if (opcode == NULL)
+    	return NULL;
+    
+        strcat(source,opcode);
+        strcat(dest, ARE);
+        strncat(source,dest,5);
+return source;
+}
+

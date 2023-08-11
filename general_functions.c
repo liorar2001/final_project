@@ -26,8 +26,6 @@ struct LineData* divide_line(char line[]) {
     lineData->paramB = NULL;
     lineData->lable= NULL;
     lineData->next = NULL;
-    
-    printf("Processing line: %s", line);
     if (strncmp(line, ";", 1) != 0) {
         /* Divide by semicolon */
         token = strtok(line, ";");
@@ -58,8 +56,8 @@ struct LineData* divide_line(char line[]) {
     return lineData;
 }
 int check_operands(char *param) {
-    char twoOperands[][4] = {"mov", "cmp", "add", "lea"};
-    char oneOperands[][4] = {"not", "clr", "inc", "dec", "jmp", "bne", "red", "prn", "jsr", "sub" };
+    char twoOperands[][4] = {"mov", "cmp", "add", "lea", "sub" };
+    char oneOperands[][4] = {"not", "clr", "inc", "dec", "jmp", "bne", "red", "prn", "jsr" };
     char noOperands[][4] = {"rts", "stop"};
     int i;
     for (i = 0; i < sizeof(twoOperands) / sizeof(twoOperands[0]); i++) {
@@ -100,5 +98,19 @@ int contains(const char* str, const char* substr) {
     }
 
     return 0; /*Substring not found*/
+}
+int dataType(char* param) {
+    /*if register*/
+    char* p = &param[2];
+    if (contains(param, "@r") == 1) {
+        if (atoi(p) >= 0 && atoi(p) <= 7)
+            return 5;
+    }
+    /*if number*/
+    else if (atoi(param) != 0)
+        return 1;
+    else /*lable*/
+        return 3;
+return 0;
 }
 

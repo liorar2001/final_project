@@ -22,15 +22,15 @@ struct lists* searchEntryAndExtern(struct LineData* LineDataHead, char* argv[], 
     struct FileData* fileEnt = NULL;
     struct FileData* fileExt = NULL;
     struct lists* list = malloc(sizeof(struct lists));
-    int lineNum = 100;
+    int lineNum = 100,step;
     char* name = argv[count];
+    char*token;
+    char *param;
 
     printf("#### search entry ###\n");
-
     fileEnt = open_file(".ent", name); /*open ent file*/
     fileExt = open_file(".ext", name); /*open ext file*/
     lineData = LineDataHead;
-
     while (lineData) {
         if (strcmp(lineData->command, ".entry") == 0) {
             if (ent_head != NULL)
@@ -119,7 +119,25 @@ struct lists* searchEntryAndExtern(struct LineData* LineDataHead, char* argv[], 
             }
 
             /* Next instruction */
-            IC = IC + check_operands(lineData->command);
+            step = check_operands(lineData->command);
+	    param=malloc(sizeof(char));
+            param=lineData->paramA;
+            if(step==3)
+            if (dataType(param) == 5 && dataType(lineData->paramB) == 5)step = 2;          
+            if (strcmp(lineData->command, ".string") == 0)
+                step = strlen(param) - 1;
+            if (strcmp(lineData->command,".data") == 0)
+            {
+                step = 0;
+                token = strtok(param, ",");
+                while (token != NULL)
+                {
+                    /*Get next token:*/
+                    token = strtok(NULL, ",");
+                    step++;
+                }
+            }
+            IC = IC + step;
         }
 
         /* Next line*/
@@ -184,9 +202,9 @@ struct lists* searchEntryAndExtern(struct LineData* LineDataHead, char* argv[], 
     list->entry = ent_head;
     list->external = externP;
     list->orders = orderList;
+    list->Lables = LableList;
     /* Print results to files*/
     printList_entext(ent_head, fileEnt->fpw);
-    printf("--------------------------\n");
     printList_entext(externP, fileExt->fpw);
     printf("IC=%d DC=%d\n",IC-=DC,DC);
 
@@ -210,7 +228,6 @@ void append_entext(struct entext_list* head, char* node, int address)
 void printList_entext(struct entext_list* head, FILE* fp) {
     struct entext_list* temp = head;
     while (temp != NULL) {
-        printf("%s: %d\n", temp->value, temp->lineNumber);
         fprintf(fp, "%s: %d\n", temp->value, temp->lineNumber);
         temp = temp->next;
     }

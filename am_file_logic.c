@@ -135,9 +135,6 @@ struct LineData* am_logic(int argc, char* argv[], int count) {
                
             }
         }
-            printf("Printing the labels:\n");
-            printList(lineData);
-       
         fclose(fp);
         if(fileData->fpw!=NULL)
         fclose(fileData->fpw);
@@ -146,7 +143,61 @@ struct LineData* am_logic(int argc, char* argv[], int count) {
         printf("file %s does not exist\n", argv[count]);
         return 0;
     }
-    printf("Printing the macros:\n");
-    printListM(head_mcro);
     return lineDataHead;
+}
+void removeWhiteSpace(char* str) {
+    if (str != NULL) {
+        char* src = str;
+        char* dst = str;
+        /* Copy characters except whitespace*/
+        while (*src != '\0') {
+            if (!isspace((unsigned char)*src)) {
+                *dst = *src;
+                dst++;
+            }
+            src++;
+        }
+        /* Terminate the string*/
+        *dst = '\0';
+    }
+}
+void append(struct  LineData* head, struct  LineData* node)
+{
+    struct LineData* temp = head;
+    while (temp->next) {
+        temp = temp->next;
+    }
+    temp->next = node;
+}
+void printList(struct LineData* head) {
+    struct LineData* temp = head;
+    while (temp != NULL) {
+        if (temp->lable != NULL)
+            printf("%s\n", temp->lable);
+        temp = temp->next;
+    }
+}
+void printListM(struct macro* head) {
+    struct LineData* temp = head->content;
+    while (temp != NULL) {
+        printf("%s: %s\n", temp->command, temp->paramA);
+        temp = temp->next;
+    }
+}
+void freeList(struct LineData* head)
+{
+    if (head)
+    {
+        struct LineData* temp = head->next;
+        while (temp != NULL)
+        {
+            free(head);
+            head = temp;
+            temp = head->next;
+        }
+    }
+}
+void freeListM(struct macro* head)
+{
+    freeList(head->content);
 }
