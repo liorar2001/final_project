@@ -26,8 +26,11 @@ struct LineData* am_logic(int argc, char* argv[], int count) {
      struct macro* tempMcro ;
     int macroFlag = 0;
     char* name = argv[count];
+    char* nameFile= (char*)malloc(MAX_SIZE);
+    strcpy(nameFile,name);
+    strcat(nameFile,".as");
     /*open input file */
-    fp = fopen(name, "r");
+    fp = fopen(nameFile, "r");
     if (fp != NULL)
     {
         fileData = open_file(".am",name); /*open am file */
@@ -142,7 +145,7 @@ struct LineData* am_logic(int argc, char* argv[], int count) {
         fclose(fileData->fpw);
     }
     else {
-        printf("file %s does not exist\n", argv[count]);
+        printf("file %s.as does not exist\n", argv[count]);
         return 0;
     }
     return lineDataHead;

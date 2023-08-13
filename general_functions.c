@@ -46,9 +46,11 @@ struct LineData* divide_line(char line[]) {
             token = strtok(NULL, ":");
         }
         if (contains(token, ".data") == 1){
+            removeWhiteSpace(token);
             /* Divide by spaces */
-            lineData->command = strtok(token, " ");
-            lineData->paramA = strtok(NULL, " ");
+            lineData->paramA = strtok(token, ".data");
+            lineData->command = ".data";
+            return lineData;
         }
         else {
             /* Divide by comma */
