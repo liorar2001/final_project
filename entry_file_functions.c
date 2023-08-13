@@ -4,8 +4,17 @@
 #include <stdlib.h>
 #include <ctype.h>
 #define MAX_SIZE 81
+/**
+ * Searches for entry and extern labels in the assembly code and populates relevant lists.
+ *
+ * @param LineDataHead - The head of the LineData list containing assembly code.
+ * @param argv - The command-line arguments.
+ * @param count - The number of arguments.
+ * @return A struct containing lists of entry, external, order labels, and more.
+ */
 struct lists* searchEntryAndExtern(struct LineData* LineDataHead, char* argv[], int count) {
-    int flagEnt = 0, flagExt = 0;
+    /* Initialization*/
+	int flagEnt = 0, flagExt = 0;
     struct LineData* lineData = NULL;
     struct LineData* orderList = NULL;
     struct entext_list* LableList = NULL;
@@ -28,6 +37,7 @@ struct lists* searchEntryAndExtern(struct LineData* LineDataHead, char* argv[], 
     fileExt = open_file(".ext", name); /*open ext file*/
     lineData = LineDataHead;
     while (lineData) {
+		/*Check if it's an entry directive*/
         if (strcmp(lineData->command, ".entry") == 0) {
             if (ent_head != NULL)
                 append_entext(ent_head, lineData->paramA, 0);
@@ -41,6 +51,7 @@ struct lists* searchEntryAndExtern(struct LineData* LineDataHead, char* argv[], 
             }
             flagEnt = 1;
         }
+		/* Check if it's an extern directive*/
         else if (strcmp(lineData->command, ".extern") == 0) {
             if (ext_head != NULL)
                 append_entext(ext_head, lineData->paramA, 0);
@@ -199,7 +210,12 @@ struct lists* searchEntryAndExtern(struct LineData* LineDataHead, char* argv[], 
     IC-=DC;
     return list;
 }
-
+/** Appends a node with a value and an address to the end of an entext_list.
+ *
+ * @param head - The head of the entext_list.
+ * @param node - The value to append.
+ * @param address - The address associated with the value.
+ */
 void append_entext(struct entext_list* head, char* node, int address)
 {
     struct entext_list* temp = head;
@@ -214,6 +230,11 @@ void append_entext(struct entext_list* head, char* node, int address)
         temp->next->lineNumber = address;
     }
 }
+/** Prints the values and addresses of an entext_list to a file.
+ *
+ * @param head - The head of the entext_list.
+ * @param fp - The file pointer to write to.
+ */
 void printList_entext(struct entext_list* head, FILE* fp) {
     struct entext_list* temp = head;
     while (temp != NULL) {
@@ -221,6 +242,10 @@ void printList_entext(struct entext_list* head, FILE* fp) {
         temp = temp->next;
     }
 }
+/** Frees the memory occupied by an entext_list.
+ *
+ * @param head - The head of the entext_list.
+ */
 void freeList_entext(struct entext_list* head) {
     struct entext_list* temp;
     while (head != NULL) {

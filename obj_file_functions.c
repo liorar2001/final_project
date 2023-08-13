@@ -3,9 +3,18 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+/* Base64 characters for encoding */
 const char base64_chars[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+/* List of assembly opcodes */
 char opcode[][5] = { "mov","cmp","add","sub","not","clr","lea",
                             "inc","dec","jmp","bne","red","prn","jsr","rts","stop" };
+/**
+ * Generates an object file from assembly code.
+ *
+ * @param orderlist - The list of assembly orders.
+ * @param argv - The command-line arguments.
+ * @param count - The number of arguments.
+ */
 void makeObjFile(struct lists* orderlist ,char* argv[], int count)
 {
     struct LineData* lineData = NULL;
@@ -18,28 +27,37 @@ void makeObjFile(struct lists* orderlist ,char* argv[], int count)
     char* name = argv[count];
     char* token=NULL;
     int i;
+	 /*Fetch the assembly orders and open the output object file*/
     lineData = orderlist->orders;
     fileObj = open_file(".obj", name);
+	/*Write IC DC at the start of the file*/
     fprintf(fileObj->fpw, "%d %d\n",IC,DC);
+	 /* Loop through each line of assembly code */
     while (lineData)
     {
+		/* Check if the line is not a directive */
         if (lineData->command[0] != '.')
         {
+			/* Handle cases where paramA exists but paramB is absent */
             if (lineData->paramA != NULL && lineData->paramB == NULL)
             {
                 lineData->paramB = lineData->paramA;
                 lineData->paramA = NULL;
             }
+			 /* Generate binary code for the instruction */
             Bin1 = general_code(lineData);
             fprintf(fileObj->fpw, "%s\n", binaryToBase64(Bin1));
+			/* Handle paramA if it exists */
             if (lineData->paramA != NULL)
             {
+				/* Extract the parameter value */
                 p = &lineData->paramA[2];
+				/* Determine data type of paramA and generate corresponding binary */
                 switch (dataType(lineData->paramA))
                 {
 
                 case 5: /*register*/
-
+					 /* Generate binary for register operand */
                     param1 = decimalToBinary(atoi(p), 5);
                     if (dataType(lineData->paramB) != 5)
                     {
@@ -49,11 +67,13 @@ void makeObjFile(struct lists* orderlist ,char* argv[], int count)
                     }
                     break;
                 case 1: /*number*/
+				 /* Generate binary for numeric operand */
                     param1 = decimalToBinary(atoi(lineData->paramA), 10);
                     strcat(param1, "00");
                     fprintf(fileObj->fpw, "%s\n", binaryToBase64(param1));
                     break;
                 case 3: /*lable*/
+				/* Search for the label in the list and generate binary */
                     lablep = orderlist->Lables;
                     while (lablep != NULL)
                     {
@@ -72,13 +92,14 @@ void makeObjFile(struct lists* orderlist ,char* argv[], int count)
                     break;
                 }
             }
+			/* Handle paramB if it exists */
             if (lineData->paramB != NULL)
             {
                 char* p = &lineData->paramB[2];
                 switch (dataType(lineData->paramB))
                 {
                 case 5: /*register*/
-
+					/* Generate binary for register operand */
                     param2 = decimalToBinary(atoi(p), 5);
                     if (dataType(lineData->paramA) == 5)
                     {
@@ -94,11 +115,13 @@ void makeObjFile(struct lists* orderlist ,char* argv[], int count)
                     }
                     break;
                 case 1: /*number*/
+				/* Generate binary for numeric operand */
                     param2 = decimalToBinary(atoi(lineData->paramB), 10);
                     strcat(param2, "00");
                     fprintf(fileObj->fpw, "%s\n", binaryToBase64(param2));
                     break;
                 case 3: /*lable*/
+				/* Search for the label in the list and generate binary */
                     lablep = orderlist->Lables;
                     param2 = decimalToBinary(0, 10);
                     while (lablep != NULL)
@@ -119,6 +142,7 @@ void makeObjFile(struct lists* orderlist ,char* argv[], int count)
             }
         }
         else {
+			 /* Handle directives (.string and .data) */
             if (strcmp(lineData->command, ".string") == 0) {
                 i = 1;
                 param1 = lineData->paramA;
@@ -141,10 +165,19 @@ void makeObjFile(struct lists* orderlist ,char* argv[], int count)
             } 
 
         }
+		/* Move to the next line of assembly code */
         lineData = lineData->next;
     }
+	 /* Close the object file */
     fclose(fileObj->fpw);
 }
+/**
+ * Converts a decimal number to a binary string.
+ *
+ * @param num - The decimal number to convert.
+ * @param digits - The number of digits in the binary representation.
+ * @return The binary string representation of the number.
+ */
 char* decimalToBinary(int num, int digits) {
     int i;
     char* binaryString = (char*)malloc(13); /* digits bits + null-terminator */
@@ -172,6 +205,12 @@ char* decimalToBinary(int num, int digits) {
     }
     return binaryString;
 }
+/**
+ * Converts a binary string to Base64 encoding.
+ *
+ * @param binaryString - The binary string to convert.
+ * @return The Base64-encoded string.
+ */
 char* binaryToBase64(const char* binaryString) 
 {
  int i = 0, j = 0;
@@ -211,6 +250,12 @@ char* binaryToBase64(const char* binaryString)
 
     return base64String;
 }
+/**
+ * Searches for an assembly opcode and returns its index.
+ *
+ * @param param - The opcode to search for.
+ * @return The index of the opcode in the opcode array.
+ */
 int SearchOperand(char* param) {
     int i;
     if (param != NULL)
@@ -226,6 +271,13 @@ int SearchOperand(char* param) {
         return -1;
 return 0;
 }
+/**
+ * Determines the addressing mode of a parameter and returns the corresponding ARE value.
+ *
+ * @param param - The parameter to determine the addressing mode for.
+ * @param list - The list of labels.
+ * @return The ARE value corresponding to the addressing mode.
+ */
 char* ARE(char* param, struct lists* list){
    struct entext_list* p1 = list->entry;
    struct entext_list* p2 = list->external;
@@ -250,7 +302,12 @@ char* ARE(char* param, struct lists* list){
         }
 return "Error:This label does not exist!!!";
 }
-
+/**
+ * Generates the binary code for an assembly instruction.
+ *
+ * @param lineData - The LineData structure containing assembly instruction data.
+ * @return The generated binary code.
+ */
 char* general_code(struct LineData* lineData)
 {
     char* source= decimalToBinary(0, 3);

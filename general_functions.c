@@ -5,6 +5,12 @@
 #include "general_functions.h"
 #define MAX_SIZE 81
 int IC = 0, DC = 0;
+/** Open a file with the specified extension for writing.
+ *
+ * @param extension - The file extension to be added to the filename.
+ * @param name - The name of the file without the extension.
+ * @return A pointer to the FileData struct containing the file pointer and filename.
+ */
 struct FileData* open_file(char *extension,char* name) {
    struct FileData* fileData=malloc(sizeof(struct FileData));
    char* fname = malloc(sizeof(name));
@@ -17,7 +23,11 @@ struct FileData* open_file(char *extension,char* name) {
    }
     return fileData;
 }
-
+/** Divide a line of assembly code into LineData components.
+ *
+ * @param line - The line of assembly code to be divided.
+ * @return A pointer to the LineData struct containing the components of the line.
+ */
 struct LineData* divide_line(char line[]) {
     struct LineData *lineData =(struct LineData*) malloc(sizeof(struct LineData));
     char *token;
@@ -56,6 +66,11 @@ struct LineData* divide_line(char line[]) {
     }
     return lineData;
 }
+/** Check the number of operands a command requires.
+ *
+ * @param param - The command to be checked.
+ * @return The number of operands required by the command.
+ */
 int check_operands(char *param) {
     char twoOperands[][4] = {"mov", "cmp", "add", "lea", "sub" };
     char oneOperands[][4] = {"not", "clr", "inc", "dec", "jmp", "bne", "red", "prn", "jsr" };
@@ -78,6 +93,12 @@ int check_operands(char *param) {
     }
     return 1;
 }
+/** Check if a string contains a substring.
+ *
+ * @param str - The main string to be checked.
+ * @param substr - The substring to search for.
+ * @return 1 if the substring is found, 0 otherwise.
+ */
 int contains(const char* str, const char* substr) {
     size_t str_len = strlen(str);
     size_t substr_len = strlen(substr);
@@ -100,6 +121,11 @@ int contains(const char* str, const char* substr) {
 
     return 0; /*Substring not found*/
 }
+/** Determine the data type of a parameter (number, register, or label).
+ *
+ * @param param - The parameter to be checked.
+ * @return 1 if number, 3 if label, 5 if register, 0 otherwise.
+ */
 int dataType(char* param) {
     /*if register*/
     char* p = &param[2];

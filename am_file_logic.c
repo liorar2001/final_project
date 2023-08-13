@@ -4,6 +4,13 @@
 #include <stdlib.h>
 #include <ctype.h>
 #define MAX_SIZE 81
+/** Implementation of AM Logic for processing input assembly code.
+ *
+ * @param argc - The number of command-line arguments.
+ * @param argv - An array of command-line argument strings.
+ * @param count - The index of the current input assembly file in argv.
+ * @return A linked list of LineData structures representing the assembly code.
+ */
 struct LineData* am_logic(int argc, char* argv[], int count) {
     /* declearations */
     int i;
@@ -140,6 +147,10 @@ struct LineData* am_logic(int argc, char* argv[], int count) {
     }
     return lineDataHead;
 }
+/** Remove white spaces from a string.
+ *
+ * @param str - The string from which white spaces will be removed.
+ */
 void removeWhiteSpace(char* str) {
     if (str != NULL) {
         char* src = str;
@@ -156,6 +167,11 @@ void removeWhiteSpace(char* str) {
         *dst = '\0';
     }
 }
+/** Append a LineData node to a linked list.
+ *
+ * @param head - The head of the linked list.
+ * @param node - The LineData node to be appended.
+ */
 void append(struct  LineData* head, struct  LineData* node)
 {
     struct LineData* temp = head;
@@ -164,6 +180,10 @@ void append(struct  LineData* head, struct  LineData* node)
     }
     temp->next = node;
 }
+/** Print the linked list of LineData.
+ *
+ * @param head - The head of the linked list.
+ */
 void printList(struct LineData* head) {
     struct LineData* temp = head;
     while (temp != NULL) {
@@ -172,6 +192,11 @@ void printList(struct LineData* head) {
         temp = temp->next;
     }
 }
+
+/** Print the linked list of LineData contained in a macro.
+ *
+ * @param head - The head of the linked list of LineData.
+ */
 void printListM(struct macro* head) {
     struct LineData* temp = head->content;
     while (temp != NULL) {
@@ -179,6 +204,10 @@ void printListM(struct macro* head) {
         temp = temp->next;
     }
 }
+/** Free the memory allocated for a linked list of LineData.
+ *
+ * @param head - The head of the linked list to be freed.
+ */
 void freeList(struct LineData* head)
 {
     if (head)
@@ -192,6 +221,10 @@ void freeList(struct LineData* head)
         }
     }
 }
+/** Free the memory allocated for a linked list of LineData within a macro.
+ *
+ * @param head - The head of the linked list of LineData within a macro.
+ */
 void freeListM(struct macro* head)
 {
     freeList(head->content);
