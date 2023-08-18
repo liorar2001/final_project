@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
-int IC, DC;
+int IC, DC,line_count,line_count_am;
 /*structs*/
 struct LineData {
     char *lable;
@@ -67,3 +67,4 @@ void printList(struct LineData* head);
 void printListM(struct macro* head);
 void freeList(struct LineData* head);
 struct LineData* am_logic(int argc, char* argv[], int count);
+int search_errors(struct LineData* lineData, char* name);

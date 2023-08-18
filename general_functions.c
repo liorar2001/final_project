@@ -1,10 +1,10 @@
+#include "general_functions.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include "general_functions.h"
 #define MAX_SIZE 81
-int IC = 0, DC = 0;
+int IC = 0, DC = 0,line_count = 0,line_count_am=0;
 /** Open a file with the specified extension for writing.
  *
  * @param extension - The file extension to be added to the filename.
@@ -14,14 +14,17 @@ int IC = 0, DC = 0;
 struct FileData* open_file(char *extension,char* name) {
    struct FileData* fileData=malloc(sizeof(struct FileData));
    char* fname = malloc(sizeof(name));
-   strcpy(fname,name);
-   if (fileData)
-   {
-       strcat(fname, extension);
-       fileData->fpw = fopen(fname, "w+");
-       fileData->name = fname;
+   if (fname != 0) {
+       strcpy(fname, name);
+       if (fileData)
+       {
+           strcat(fname, extension);
+           fileData->fpw = fopen(fname, "w+");
+           fileData->name = fname;
+       }
    }
-    return fileData;
+       return fileData;
+   
 }
 /** Divide a line of assembly code into LineData components.
  *
@@ -142,3 +145,58 @@ int dataType(char* param) {
         return 3;
 return 0;
 }
+int search_errors(struct LineData* lineData, char* name) {
+    int i = 0;
+    int flag = 0;
+    char commands[][8] = { "mov","cmp","add","sub","not","clr","lea",
+                            "inc","dec","jmp","bne","red","prn","jsr",
+                            "rts","stop",".entry",".data","mcro",".string",".extern" };
+    if (lineData->paramA != NULL) {
+        if (contains(lineData->paramA, "@r") == 1 && (atoi(&lineData->paramA[2]) < 0 || atoi(&lineData->paramA[2]) > 7)) {
+            printf("Error: in file '%s' register '%s' invalid in line %d\n", name, lineData->paramA, line_count);
+            flag = 1;
+        }
+    }
+    while (strcmp(lineData->command, commands[i]) != 0 && i < 21)
+        i++;
+    if (i == 21) {
+        printf("Error: in file %s the command '%s' is invalid in line %d\n", name, lineData->command, line_count);
+        flag = 1;
+    }
+    if (strcmp(lineData->command, commands[i]) == 0)
+    {
+        if (lineData->paramA != NULL) {
+            i = 0;
+            while (strcmp(lineData->paramA, commands[i]) != 0 && i < 21)
+                i++;
+            if ((strcmp(lineData->paramA, commands[i]) == 0)) {
+                if (strcmp(lineData->command, "mcro") == 0) {
+                    printf("Error: in file %s paramA '%s' is invalid in line %d\n", name, lineData->paramA, line_count_am);
+                    flag = 1;
+                }
+                else {
+                    printf("Error: in file %s paramA '%s' is invalid in line %d\n", name, lineData->paramA, line_count);
+                    flag = 1;
+                }
+            }
+        }
+        if (lineData->paramB != NULL) {
+            i = 0;
+            while (strcmp(lineData->paramB, commands[i]) != 0 && i < 21)
+                i++;
+            if ((strcmp(lineData->paramB, commands[i]) == 0)) {
+
+                if (strcmp(lineData->command, "mcro") == 0) {
+                    printf("Error: in file %s paramB '%s' is invalid in line %d\n", name, lineData->paramB, line_count_am);
+                    flag = 1;
+                }
+                else {
+                    printf("Error: in file %s paramB '%s' is invalid in line %d\n", name, lineData->paramB, line_count);
+                    flag = 1;
+                }
+            }
+        }
+    }
+    return flag;
+}
+

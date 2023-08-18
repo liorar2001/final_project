@@ -36,6 +36,7 @@ struct LineData* am_logic(int argc, char* argv[], int count) {
         fileData = open_file(".am",name); /*open am file */
         while (fgets(line, MAX_SIZE, fp))
         {
+            line_count_am++;
             /*divide into parts*/
             char* tmp=(char*)malloc(MAX_SIZE);
             if (tmp == NULL)return NULL;
@@ -46,8 +47,9 @@ struct LineData* am_logic(int argc, char* argv[], int count) {
             {
                 if (strcmp(lineData->command, "mcro") == 0)
                 {
-                    if (check_operands(lineData->paramA) == -1) {
-                        printf("Error, mcro name invalid");
+                    if (search_errors(lineData,name) == 1|| strcmp(lineData->paramA,".entry")==0 ||
+                        strcmp(lineData->paramA, ".extern") == 0 || strcmp(lineData->paramA, ".data") == 0|| 
+                        strcmp(lineData->paramA, "mcro") == 0 ){
                         fclose(fp);
                         if(fileData->fpw!=NULL)
                         fclose(fileData->fpw);
@@ -145,7 +147,7 @@ struct LineData* am_logic(int argc, char* argv[], int count) {
         fclose(fileData->fpw);
     }
     else {
-        printf("file %s.as does not exist\n", argv[count]);
+        printf("Warning: file %s.as does not exist\n", argv[count]);
         return 0;
     }
     return lineDataHead;

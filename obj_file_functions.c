@@ -35,7 +35,7 @@ void makeObjFile(struct lists* orderlist ,char* argv[], int count)
 	 /* Loop through each line of assembly code */
     while (lineData)
     {
-		/* Check if the line is not a directive */
+        /* Check if the line is not a directive */
         if (lineData->command[0] != '.')
         {
 			/* Handle cases where paramA exists but paramB is absent */
@@ -103,9 +103,11 @@ void makeObjFile(struct lists* orderlist ,char* argv[], int count)
                     param2 = decimalToBinary(atoi(p), 5);
                     if (dataType(lineData->paramA) == 5)
                     {
-                        strcat(param1, param2);
-                        strcat(param1, "00");
-                        fprintf(fileObj->fpw, "%s\n", binaryToBase64(param1));
+                        if (param1 != 0) {
+                            strcat(param1, param2);
+                            strcat(param1, "00");
+                            fprintf(fileObj->fpw, "%s\n", binaryToBase64(param1));
+                        }
                     }
                     else
                     {
@@ -180,7 +182,7 @@ void makeObjFile(struct lists* orderlist ,char* argv[], int count)
  */
 char* decimalToBinary(int num, int digits) {
     int i;
-    char* binaryString = (char*)malloc(13); /* digits bits + null-terminator */
+    char* binaryString = (char*)malloc(100); /* digits bits + null-terminator */
 
     if (binaryString == NULL) {
         printf("Memory allocation failed.\n");
@@ -245,8 +247,7 @@ char* binaryToBase64(const char* binaryString)
         value = value << (6 - bits);
         base64String[j++] = base64_chars[value];
     }
-
-    base64String[j] = '\0'; /* Null-terminate the Base64 string*/
+    strncpy(base64String + j, "\0", 1); /* Null-terminate the Base64 string*/
 
     return base64String;
 }
